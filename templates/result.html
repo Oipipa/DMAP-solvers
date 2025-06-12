@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>{{ mode }} Solution</h1>
+
+  {% if img %}
+    <div>
+      <img src="data:image/png;base64,{{ img }}" alt="Dendrogram">
+    </div>
+  {% endif %}
+
+  {% for step in steps %}
+    <p>$$ {{ step }} $$</p>
+  {% endfor %}
+
+  <button id="reveal-button" class="btn btn-secondary mb-3">Reveal TEX source</button>
+  <pre id="source-code" class="bg-light p-2 border" style="display:none;">
+{% for step in steps %}$$ {{ step }} $$
+{% endfor %}</pre>
+
+  <p><a href="{{ url_for('index') }}">← Back</a></p>
+
+  <script>
+    document.getElementById('reveal-button').addEventListener('click', function(){
+      var pre = document.getElementById('source-code');
+      var isHidden = pre.style.display === 'none';
+      pre.style.display = isHidden ? 'block' : 'none';
+      this.textContent = isHidden ? 'Hide TEX source' : 'Reveal TEX source';
+    });
+  </script>
+{% endblock %}
