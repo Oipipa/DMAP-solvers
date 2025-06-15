@@ -15,6 +15,7 @@ from solvers.normalization import solve_normalization
 from solvers.emd import solve_emd
 from solvers.tfidf import solve_tfidf
 from solvers.bow import solve_bow
+from solvers.metrics import solve_metrics
 
 app = Flask(__name__)
 
@@ -136,6 +137,13 @@ def solve():
         docs     = [d.strip() for d in docs_raw.split(';') if d.strip()]
         new_doc  = request.form['bow_newdoc'].strip() or None
         steps    = solve_bow(docs, new_doc)
+
+    elif mode == 'metrics':
+        y_true = [t.strip() for t in request.form['metrics_true'].split(',')
+                  if t.strip()]
+        y_pred = [p.strip() for p in request.form['metrics_pred'].split(',')
+                  if p.strip()]
+        steps  = solve_metrics(y_true, y_pred)
     else:
         return redirect(url_for('index'))
 

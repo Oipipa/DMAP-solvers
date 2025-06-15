@@ -23,6 +23,7 @@
           <option value="emd">EMD</option>
           <option value="tfidf">TF-IDF</option>
           <option value="bow">Bag-of-Words</option>
+          <option value="metrics">Classification Metrics</option>
         </select>
       </div>
 
@@ -244,6 +245,14 @@
     <!-- hidden field actually posted -->
     <input type="hidden" name="bow_docs" id="bow_docs_hidden">
 
+    <div class="input-group mb-3" id="metrics-input">
+      <span class="input-group-text">True labels</span>
+      <input type="text" name="metrics_true" class="form-control"
+            placeholder="A,B,A,C">
+      <span class="input-group-text">Predicted</span>
+      <input type="text" name="metrics_pred" class="form-control"
+            placeholder="A,B,C,C">
+    </div>
 
 
       <button type="submit" class="btn btn-primary">Solve</button>
