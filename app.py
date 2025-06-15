@@ -13,6 +13,7 @@ from solvers.fpgrowth import solve_fpgrowth
 from solvers.cross_entropy import solve_cross_entropy
 from solvers.normalization import solve_normalization
 from solvers.emd import solve_emd
+from solvers.tfidf import solve_tfidf
 
 app = Flask(__name__)
 
@@ -112,6 +113,23 @@ def solve():
         P = [float(x) for x in request.form['emd_p'].split(',') if x.strip()]
         Q = [float(x) for x in request.form['emd_q'].split(',') if x.strip()]
         steps = solve_emd(P, Q)
+
+    elif mode == 'tfidf':
+        # documents come from the hidden field we populate in JS
+        docs_raw = request.form['tfidf_docs']
+        docs     = [d.strip() for d in docs_raw.split(';') if d.strip()]
+
+        # queries come as "term,docIdx;term2,docIdx2"
+        raw_queries = request.form['tfidf_queries']
+        queries = []
+        for q in raw_queries.split(';'):
+            if not q.strip():
+                continue
+            term, idx = q.rsplit(',', 1)
+            queries.append((term.strip(), int(idx)))
+
+        steps = solve_tfidf(docs, queries)
+
     else:
         return redirect(url_for('index'))
 

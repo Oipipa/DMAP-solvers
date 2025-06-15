@@ -21,6 +21,7 @@
           <option value="cross_entropy">Cross-Entropy</option>
           <option value="normalization">Normalizations</option>
           <option value="emd">EMD</option>
+          <option value="tfidf">TF-IDF</option>
         </select>
       </div>
 
@@ -183,6 +184,37 @@
                placeholder="0,0,1">
       </div>
 
+      <!-- TF-IDF -------------------------------------------------------------->
+       
+      <div id="tfidf-input" class="input-group mb-3">
+        <label class="form-label">Documents</label>
+
+        <!-- container that will hold all textarea docs -->
+        <div id="tfidf-docs-container" class="d-flex flex-column gap-2">
+          <!-- start with two docs (min requirement) -->
+          <textarea class="form-control doc-field" rows="1"
+                    placeholder="Document 1"></textarea>
+          <textarea class="form-control doc-field" rows="1"
+                    placeholder="Document 2"></textarea>
+        </div>
+
+        <button type="button"
+                id="add-doc-btn"
+                class="btn btn-outline-secondary btn-sm mt-2">
+          + Add document
+        </button>
+      </div>
+
+      <div class="input-group mb-3" id="tfidf-input-2">
+        <span class="input-group-text">Queries term,doc#</span>
+        <input type="text" name="tfidf_queries" class="form-control"
+              placeholder="cat,1;dog,2">
+      </div>
+
+      <!-- hidden field that will actually be posted -->
+      <input type="hidden" name="tfidf_docs" id="tfidf_docs_hidden">
+
+
       <button type="submit" class="btn btn-primary">Solve</button>
     </form>
   </div>
@@ -194,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function(){
         groups = document.querySelectorAll('.input-group'),
         rows2 = document.querySelectorAll(
           '#kmeans-input-2,#kmeans-input-3,' +
-          '#apiori-input-2,#eclat-input-2,#fpgrowth-input-2'
+          '#apiori-input-2,#eclat-input-2,#fpgrowth-input-2,#tfidf-input-2'
         );
   function upd(){
     groups.forEach(g => {
@@ -205,13 +237,38 @@ document.addEventListener('DOMContentLoaded', function(){
         kmeans: ['kmeans-input-2','kmeans-input-3'],
         apiori : ['apiori-input-2'],
         eclat: ['eclat-input-2'],
-        fpgrowth: ['fpgrowth-input-2']
+        fpgrowth: ['fpgrowth-input-2'],
+        tfidf  : ['tfidf-input-2'] 
       };
       r.style.display = map[m.value]?.includes(r.id) ? 'flex' : 'none';
     });
   }
   m.addEventListener('change', upd);
   upd();
+});
+
+/* ---------------- TF-IDF dynamic docs ---------------- */
+const docsContainer = document.getElementById('tfidf-docs-container');
+const addDocBtn     = document.getElementById('add-doc-btn');
+const docsHidden    = document.getElementById('tfidf_docs_hidden');
+const formEl        = document.querySelector('form');
+
+// add another textarea when the + button is pressed
+addDocBtn.addEventListener('click', () => {
+  const count = docsContainer.querySelectorAll('.doc-field').length + 1;
+  const ta = document.createElement('textarea');
+  ta.className = 'form-control doc-field';
+  ta.rows = 1;
+  ta.placeholder = `Document ${count}`;
+  docsContainer.appendChild(ta);
+});
+
+// on submit, collect all non-empty doc texts into the hidden field
+formEl.addEventListener('submit', () => {
+  const texts = Array.from(docsContainer.querySelectorAll('.doc-field'))
+                     .map(t => t.value.trim())
+                     .filter(t => t !== '');
+  docsHidden.value = texts.join(';');
 });
 </script>
 {% endblock %}
