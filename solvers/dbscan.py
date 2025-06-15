@@ -25,7 +25,7 @@ def solve_dbscan(points_raw, eps_raw, min_samples_raw, metric):
 
     # (b) parameters
     steps.append(
-        "(b) metric = %s, \\epsilon = %.2f, \\min\\_samples = %d"
+        "(b) \\text{metric} = %s, \\epsilon = %.2f, \\text{min_samples} = %d"
         % (metric, eps, min_samples)
     )
 
@@ -80,20 +80,20 @@ def solve_dbscan(points_raw, eps_raw, min_samples_raw, metric):
             continue
         visited.add(i)
         labels[i] = cid
-        exp_lines.append("Create cluster %d with p_{%d}" % (cid+1, i+1))
+        exp_lines.append("\\text{Create cluster %d with p_{%d}}" % (cid+1, i+1))
         seeds = list(neigh[i])
         while seeds:
             q = seeds.pop(0)
             if q not in visited:
                 visited.add(q)
                 labels[q] = cid
-                exp_lines.append("p_{%d} added to cluster %d" % (q+1, cid+1))
+                exp_lines.append("p_{%d} \\text{ added to cluster } %d" % (q+1, cid+1))
                 if q in cores:
                     new = [r for r in neigh[q] if r not in visited and r not in seeds]
                     seeds.extend(new)
                     if new:
                         added = "; ".join("p_{%d}" % (r+1) for r in new)
-                        exp_lines.append("expand from p_{%d}: add %s" % (q+1, added))
+                        exp_lines.append("\\text{expand from p_{%d}: add %s}" % (q+1, added))
         cid += 1
 
     if not exp_lines:
