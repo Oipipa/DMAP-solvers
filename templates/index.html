@@ -1,33 +1,31 @@
-{# templates/index.html #}
 {% extends "base.html" %}
 {% block content %}
 <div class="card shadow-sm mt-4">
   <div class="card-body">
     <form method="post" action="{{ url_for('solve') }}">
+
       <div class="mb-3">
-        <label class="form-label">Select Problem</label>
+        <label for="mode" class="form-label">Select Problem</label>
         <select id="mode" name="mode" class="form-select">
           <option value="pca">PCA</option>
           <option value="lda">LDA</option>
           <option value="svd">SVD</option>
           <option value="kmeans">KMeans</option>
           <option value="agglomerative">Agglomerative</option>
+          <option value="dbscan">DBSCAN</option>
           <option value="apiori">Apriori</option>
           <option value="iqr">IQR</option>
           <option value="purity">Purity</option>
           <option value="eclat">ECLAT</option>
           <option value="fpgrowth">FP-Growth</option>
-          <option value="dbscan">DBSCAN</option>
         </select>
       </div>
 
-      <!-- PCA -->
       <div class="input-group mb-3" id="pca-input">
         <span class="input-group-text">Data</span>
         <input type="text" name="data" class="form-control" placeholder="1,2;2,3;3,1">
       </div>
 
-      <!-- LDA -->
       <div class="input-group mb-3" id="lda-input">
         <span class="input-group-text">Class 1</span>
         <input type="text" name="c1" class="form-control" placeholder="1,2;2,3">
@@ -35,13 +33,11 @@
         <input type="text" name="c2" class="form-control" placeholder="3,1;4,4">
       </div>
 
-      <!-- SVD -->
       <div class="input-group mb-3" id="svd-input">
         <span class="input-group-text">Matrix A</span>
         <input type="text" name="A" class="form-control" placeholder="2,2;-1,1;3,0">
       </div>
 
-      <!-- KMeans -->
       <div class="input-group mb-3" id="kmeans-input">
         <span class="input-group-text">Points</span>
         <input type="text" name="points" class="form-control" placeholder="2,10;2,5;8,4;…">
@@ -67,13 +63,28 @@
         </div>
       </div>
 
-      <!-- Agglomerative -->
       <div class="input-group mb-3" id="agglomerative-input">
         <span class="input-group-text">Distance Matrix</span>
         <input type="text" name="matrix" class="form-control" placeholder="0,2,6,10;2,0,3,9;…">
       </div>
 
-      <!-- Apriori -->
+      <div class="input-group mb-3" id="dbscan-input">
+        <span class="input-group-text">Points</span>
+        <textarea name="dbscan_points" class="form-control" rows="2"
+          placeholder="x,y each line; e.g. 1,2\n3,4\n…"></textarea>
+        <span class="input-group-text">ε</span>
+        <input type="number" step="any" name="dbscan_eps" class="form-control" placeholder="eps">
+        <span class="input-group-text">Min Samples</span>
+        <input type="number" name="dbscan_min_samples" class="form-control" placeholder="min_samples">
+        <span class="input-group-text">Metric</span>
+        <select name="dbscan_metric" class="form-select">
+          <option value="euclidean">Euclidean</option>
+          <option value="manhattan">Manhattan</option>
+          <option value="chebyshev">Chebyshev</option>
+          <option value="cosine">Cosine</option>
+        </select>
+      </div>
+
       <div class="input-group mb-3" id="apiori-input">
         <span class="input-group-text">Transactions</span>
         <input type="text" name="transactions" class="form-control" placeholder="A,B,C;B,C,D;…">
@@ -89,25 +100,22 @@
         </div>
       </div>
 
-      <!-- IQR -->
       <div class="input-group mb-3" id="iqr-input">
         <span class="input-group-text">Data</span>
         <input type="text" name="iqr_data" class="form-control" placeholder="60,65,70,72,…">
       </div>
 
-      <!-- Purity -->
       <div class="input-group mb-3" id="purity-input">
         <span class="input-group-text">True Labels</span>
-        <input type="text" name="true" class="form-control" placeholder="A,A,A,B…">
+        <input type="text" name="true" class="form-control" placeholder="A,A,A,B,…">
         <span class="input-group-text">Pred Labels</span>
-        <input type="text" name="pred" class="form-control" placeholder="C1,C1,C2,C1…">
+        <input type="text" name="pred" class="form-control" placeholder="C1,C1,C2,C1,…">
       </div>
 
-      <!-- ECLAT -->
       <div class="input-group mb-3" id="eclat-input">
         <span class="input-group-text">Boolean matrix CSV</span>
-        <textarea class="form-control" name="eclat_matrix" rows="3"
-          placeholder=",Bread,Butter,…;T1,1,1,…;…"></textarea>
+        <textarea name="eclat_matrix" class="form-control" rows="2"
+          placeholder=",Bread,Butter;T1,1,1;…"></textarea>
       </div>
       <div class="row mb-3" id="eclat-input-2">
         <div class="col">
@@ -120,35 +128,15 @@
         </div>
       </div>
 
-      <!-- FP-Growth -->
       <div class="input-group mb-3" id="fpgrowth-input">
         <span class="input-group-text">Transactions</span>
         <input type="text" name="fpgrowth_transactions" class="form-control"
-          placeholder="T1:A,B,C,D;T2:B,C,D;…">
+          placeholder="T1:A,B,C;T2:B,C,D;…">
       </div>
       <div class="row mb-3" id="fpgrowth-input-2">
         <div class="col">
           <label class="form-label">Min support</label>
           <input type="number" name="fpgrowth_minsup" class="form-control" value="3" min="1">
-        </div>
-      </div>
-
-      <!-- DBSCAN -->
-      <div class="input-group mb-3" id="dbscan-input">
-        <span class="input-group-text">Points (one per line, comma-separated)</span>
-        <textarea class="form-control" name="dbscan_points" rows="3"
-          placeholder="1,2
-2,3
-3,1"></textarea>
-      </div>
-      <div class="row mb-3" id="dbscan-input-2">
-        <div class="col">
-          <label class="form-label">ε (radius)</label>
-          <input type="number" step="any" name="dbscan_eps" class="form-control" placeholder="0.5">
-        </div>
-        <div class="col">
-          <label class="form-label">min_samples</label>
-          <input type="number" name="dbscan_min_samples" class="form-control" placeholder="2">
         </div>
       </div>
 
@@ -161,24 +149,22 @@
 document.addEventListener('DOMContentLoaded', function(){
   const m = document.getElementById('mode'),
         groups = document.querySelectorAll('.input-group'),
-        rows2  = document.querySelectorAll(
+        rows2 = document.querySelectorAll(
           '#kmeans-input-2,#kmeans-input-3,' +
-          '#apiori-input-2,#eclat-input-2,#fpgrowth-input-2,' +
-          '#dbscan-input-2'
+          '#apiori-input-2,#eclat-input-2,#fpgrowth-input-2'
         );
-  const map2 = {
-    kmeans: ['kmeans-input-2','kmeans-input-3'],
-    apriori: ['apiori-input-2'],
-    eclat: ['eclat-input-2'],
-    fpgrowth: ['fpgrowth-input-2'],
-    dbscan: ['dbscan-input-2']
-  };
   function upd(){
-    groups.forEach(g=>{
+    groups.forEach(g => {
       g.style.display = (g.id === m.value+'-input') ? 'flex' : 'none';
     });
-    rows2.forEach(r=>{
-      r.style.display = map2[m.value]?.includes(r.id) ? 'flex' : 'none';
+    rows2.forEach(r => {
+      const map = {
+        kmeans: ['kmeans-input-2','kmeans-input-3'],
+        apriori: ['apiori-input-2'],
+        eclat: ['eclat-input-2'],
+        fpgrowth: ['fpgrowth-input-2']
+      };
+      r.style.display = map[m.value]?.includes(r.id) ? 'flex' : 'none';
     });
   }
   m.addEventListener('change', upd);
