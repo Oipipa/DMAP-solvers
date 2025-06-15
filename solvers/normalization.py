@@ -1,82 +1,94 @@
-# solvers/normalization.py
-
 import sympy as sp
-from sympy import Rational, Matrix, latex
+from sympy import Rational, nsimplify, latex
+
+DECIMALS = 5 
+
+
+def _fmt(num):
+    """
+    Render num as either
+      • 10            (if it is an integer)   OR
+      • 3/4 (0.75000) (if it is fractional)
+    """
+    num   = sp.nsimplify(num)
+    _, d  = num.as_numer_denom()
+    if d == 1:                      # pure integer – no decimal needed
+        return latex(num)
+    frac = latex(num)
+    dec  = f"{float(num):.{DECIMALS}f}"
+    return rf"{frac}\,({dec})"
+
+
+def _array(original, normalized):
+    """Build a tiny LaTeX array showing original vs. normalized."""
+    header = r"\text{Original} & \text{Normalized} \\ \hline"
+    body   = r" \\ ".join(f"{_fmt(o)} & {_fmt(n)}"
+                          for o, n in zip(original, normalized))
+    return (r"\begin{array}{|c|c|}\hline "
+            + header + r" "
+            + body   + r" \\ \hline\end{array}")
+
 
 def solve_normalization(data_list, method):
-    # exact Rationals for clean symbolic work
-    data = [Rational(x) for x in data_list]
-    n = len(data)
+    """
+    data_list : list of floats
+    method    : 'minmax' | 'zscore' | 'mean' | 'decimal'
+    returns   : list[str]  • each is a LaTeX snippet for your template
+    """
+    data  = [Rational(x) for x in data_list]
+    n     = len(data)
     steps = []
 
-    # (a) show original data vector
+    # (a) original data
     steps.append(r"\mathbf{(a)\ Original\ Data}")
-    steps.append(rf"X = {latex(Matrix([data]))}")
+    orig_line = r"X = \bigl[" + r" ,\; ".join(_fmt(x) for x in data) + r"\bigr]"
+    steps.append(orig_line)
 
     if method == "minmax":
-        # Min–Max
-        mn = min(data); mx = max(data)
-        norm = [(x - mn) / (mx - mn) for x in data]
+        mn, mx  = min(data), max(data)
+        norm    = [(x - mn) / (mx - mn) for x in data]
+
         steps.append(r"\mathbf{(b)\ Min–Max\ Normalization}")
+        steps.append(rf"\min(X)={_fmt(mn)},\;\max(X)={_fmt(mx)}")
         steps.append(
-            rf"\min(X)={latex(mn)},\;\max(X)={latex(mx)}"
-        )
-        steps.append(
-            rf"X' = \frac{{X - {latex(mn)}}}{{{latex(mx)} - {latex(mn)}}}"
+            rf"X' = \dfrac{{X-{latex(mn)}}}{{{latex(mx)}-{latex(mn)}}}"
         )
 
     elif method == "zscore":
-        # Z-Score
-        μ = sum(data) / n
-        σ = sp.sqrt(sum((x-μ)**2 for x in data) / n)
+        μ  = sum(data) / n
+        σ2 = sum((x - μ)**2 for x in data) / n
+        σ  = sp.sqrt(σ2)
         norm = [(x - μ) / σ for x in data]
+
         steps.append(r"\mathbf{(b)\ Z\!-\!Score\ Standardization}")
-        steps.append(
-            rf"\mu = \frac{{\sum X_i}}{{n}} = {latex(μ)}"
-        )
-        steps.append(
-            rf"\sigma = \sqrt{{\frac{{\sum (X_i-\mu)^2}}{n}}} = {latex(σ)}"
-        )
-        steps.append(
-            rf"X' = \frac{{X - {latex(μ)}}}{{{latex(σ)}}}"
-        )
+        steps.append(rf"\mu={_fmt(μ)},\;\sigma={_fmt(σ)}")
+        steps.append(rf"X' = \dfrac{{X-{latex(μ)}}}{{{latex(σ)}}}")
 
     elif method == "mean":
-        # Mean Normalization
-        μ = sum(data) / n
-        mn = min(data); mx = max(data)
+        μ, mn, mx = sum(data) / n, min(data), max(data)
         norm = [(x - μ) / (mx - mn) for x in data]
+
         steps.append(r"\mathbf{(b)\ Mean\ Normalization}")
         steps.append(
-            rf"\mu = {latex(μ)},\;\min(X)={latex(mn)},\;\max(X)={latex(mx)}"
+            rf"\mu={_fmt(μ)},\;\min(X)={_fmt(mn)},\;\max(X)={_fmt(mx)}"
         )
         steps.append(
-            rf"X' = \frac{{X - {latex(μ)}}}{{{latex(mx)} - {latex(mn)}}}"
+            rf"X' = \dfrac{{X-{latex(μ)}}}{{{latex(mx)}-{latex(mn)}}}"
         )
 
     elif method == "decimal":
-        # Decimal Scaling
-        # find j such that max|X'| < 1 when divide by 10^j
-        j = max(len(str(abs(x.as_numer_denom()[0]))) -
-                len(str(x.as_numer_denom()[1])) for x in data)
-        norm = [x / (10**j) for x in data]
+        # smallest power of 10 that makes every |x/10^j| < 1
+        j = max(sp.ceiling(sp.log(abs(x), 10)) if x != 0 else 0 for x in data)
+        norm = [x / (10 ** j) for x in data]
+
         steps.append(r"\mathbf{(b)\ Decimal\ Scaling}")
-        steps.append(
-            rf"j = \lceil \log_{{10}}\max(|X_i|)\rceil = {j}"
-        )
-        steps.append(
-            rf"X' = \frac{{X}}{{10^{{{j}}}}}"
-        )
+        steps.append(rf"j=\lceil\log_{{10}}\max|X_i|\rceil = {int(j)}")
+        steps.append(rf"X' = \dfrac{{X}}{{10^{int(j)}}}")
 
-    else:
-        raise ValueError("Unknown method")
+    else:                       # programmer error
+        raise ValueError("unknown normalization method → " + method)
 
-    # (c) display the paired original vs. normalized in a 2×n matrix
-    steps.append(r"\mathbf{(c)\ Resulting\ Table\ (rows: original / normalized)}")
-    M = Matrix([
-        data,
-        [sp.nsimplify(v) for v in norm]
-    ])
-    steps.append(rf"\begin{{bmatrix}} {latex(M)} \end{{bmatrix}}")
+    steps.append(r"\mathbf{(c)\ Original\ vs.\ Normalized}")
+    steps.append(_array(data, norm))
 
     return steps
