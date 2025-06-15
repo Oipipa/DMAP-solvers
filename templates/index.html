@@ -22,6 +22,7 @@
           <option value="normalization">Normalizations</option>
           <option value="emd">EMD</option>
           <option value="tfidf">TF-IDF</option>
+          <option value="bow">Bag-of-Words</option>
         </select>
       </div>
 
@@ -214,6 +215,36 @@
       <!-- hidden field that will actually be posted -->
       <input type="hidden" name="tfidf_docs" id="tfidf_docs_hidden">
 
+    <!-- Bag-of-Words (dynamic) --------------------------------------------->
+    <div id="bow-input" class="input-group mb-3">
+      <label class="form-label me-2">Documents</label>
+
+      <!-- container that holds every textarea doc -->
+      <div id="bow-docs-container" class="d-flex flex-column gap-2 flex-grow-1">
+        <!-- start with two docs as a minimum -->
+        <textarea class="form-control bow-doc" rows="1"
+                  placeholder="Document 1"></textarea>
+        <textarea class="form-control bow-doc" rows="1"
+                  placeholder="Document 2"></textarea>
+      </div>
+
+      <button type="button"
+              id="add-bow-doc-btn"
+              class="btn btn-outline-secondary btn-sm ms-2">
+        + Add document
+      </button>
+    </div>
+
+    <div class="input-group mb-3" id="bow-input-2">
+      <span class="input-group-text">Optional new doc C</span>
+      <input type="text" name="bow_newdoc" class="form-control"
+            placeholder="Leave blank if none">
+    </div>
+
+    <!-- hidden field actually posted -->
+    <input type="hidden" name="bow_docs" id="bow_docs_hidden">
+
+
 
       <button type="submit" class="btn btn-primary">Solve</button>
     </form>
@@ -226,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function(){
         groups = document.querySelectorAll('.input-group'),
         rows2 = document.querySelectorAll(
           '#kmeans-input-2,#kmeans-input-3,' +
-          '#apiori-input-2,#eclat-input-2,#fpgrowth-input-2,#tfidf-input-2'
+          '#apiori-input-2,#eclat-input-2,#fpgrowth-input-2,#tfidf-input-2,#bow-input-2'
         );
   function upd(){
     groups.forEach(g => {
@@ -238,7 +269,8 @@ document.addEventListener('DOMContentLoaded', function(){
         apiori : ['apiori-input-2'],
         eclat: ['eclat-input-2'],
         fpgrowth: ['fpgrowth-input-2'],
-        tfidf  : ['tfidf-input-2'] 
+        tfidf  : ['tfidf-input-2'],
+        bow    : ['bow-input-2'] 
       };
       r.style.display = map[m.value]?.includes(r.id) ? 'flex' : 'none';
     });
@@ -269,6 +301,29 @@ formEl.addEventListener('submit', () => {
                      .map(t => t.value.trim())
                      .filter(t => t !== '');
   docsHidden.value = texts.join(';');
+});
+
+/* ---------- Bag-of-Words dynamic docs ---------- */
+const bowContainer = document.getElementById('bow-docs-container');
+const addBowBtn    = document.getElementById('add-bow-doc-btn');
+const bowHidden    = document.getElementById('bow_docs_hidden');
+
+// add another textarea on “+”
+addBowBtn?.addEventListener('click', () => {
+  const n = bowContainer.querySelectorAll('.bow-doc').length + 1;
+  const ta = document.createElement('textarea');
+  ta.className = 'form-control bow-doc';
+  ta.rows = 1;
+  ta.placeholder = `Document ${n}`;
+  bowContainer.appendChild(ta);
+});
+
+// when form submits, gather docs -> hidden field
+document.querySelector('form').addEventListener('submit', () => {
+  const texts = Array.from(bowContainer.querySelectorAll('.bow-doc'))
+    .map(t => t.value.trim())
+    .filter(t => t !== '');
+  bowHidden.value = texts.join(';');
 });
 </script>
 {% endblock %}

@@ -14,6 +14,7 @@ from solvers.cross_entropy import solve_cross_entropy
 from solvers.normalization import solve_normalization
 from solvers.emd import solve_emd
 from solvers.tfidf import solve_tfidf
+from solvers.bow import solve_bow
 
 app = Flask(__name__)
 
@@ -129,7 +130,12 @@ def solve():
             queries.append((term.strip(), int(idx)))
 
         steps = solve_tfidf(docs, queries)
-
+    
+    elif mode == 'bow':
+        docs_raw = request.form['bow_docs']
+        docs     = [d.strip() for d in docs_raw.split(';') if d.strip()]
+        new_doc  = request.form['bow_newdoc'].strip() or None
+        steps    = solve_bow(docs, new_doc)
     else:
         return redirect(url_for('index'))
 
