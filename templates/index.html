@@ -90,16 +90,25 @@
 
       <div class="input-group mb-3" id="apiori-input">
         <span class="input-group-text">Transactions</span>
-        <input type="text" name="transactions" class="form-control" placeholder="A,B,C;B,C,D;…">
+        <input type="text" name="transactions" class="form-control"
+               placeholder="A,B,C;B,C,D;…">
       </div>
-      <div class="row mb-3" id="apiori-input-2">
+      <div class="input-group row mb-3" id="apiori-input-2">
         <div class="col">
-          <label class="form-label">Min Sup</label>
-          <input type="number" name="minsup" class="form-control" value="3" min="1">
+          <label class="form-label">Min&nbsp;Sup</label>
+          <input type="number"
+                name="minsup"
+                class="form-control"
+                min="1"
+                value="3">
         </div>
         <div class="col">
-          <label class="form-label">Min Conf</label>
-          <input type="number" name="minconf" class="form-control" value="0.7" min="0" max="1" step="0.01">
+          <label class="form-label">Min&nbsp;Conf</label>
+          <input type="number"
+                name="minconf"
+                class="form-control"
+                min="0" max="1" step="0.01"
+                value="0.7">
         </div>
       </div>
 
@@ -194,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function(){
     rows2.forEach(r => {
       const map = {
         kmeans: ['kmeans-input-2','kmeans-input-3'],
-        apriori: ['apiori-input-2'],
+        apiori : ['apiori-input-2'],
         eclat: ['eclat-input-2'],
         fpgrowth: ['fpgrowth-input-2']
       };
